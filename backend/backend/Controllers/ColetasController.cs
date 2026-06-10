@@ -1,9 +1,12 @@
-﻿using backend.Models;
+﻿using backend.Dtos;
+using backend.Models;
 using backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ColetasController : ControllerBase
@@ -15,11 +18,12 @@ namespace backend.Controllers
             _coletasService = coletasService;
         }
 
+        // Listagem com filtros (status, cliente, periodo) e paginacao.
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Coleta>>> GetColetas()
+        public async Task<ActionResult<ResultadoPaginado<Coleta>>> GetColetas([FromQuery] ColetaFiltroDto filtro)
         {
-            var coletas = await _coletasService.GetColetas();
-            return Ok(coletas);
+            var resultado = await _coletasService.GetColetas(filtro);
+            return Ok(resultado);
         }
 
         [HttpGet("{id}")]
@@ -33,81 +37,64 @@ namespace backend.Controllers
             return Ok(coleta);
         }
 
-        [HttpGet("remetente/{remetente}")]
-        public async Task<ActionResult<IEnumerable<Coleta>>> GetColetasByRemetente(string remetente)
-        {
-            var coletas = await _coletasService.GetColetasByRemetente(remetente);
-            return Ok(coletas);
-        }
-
         [HttpPost]
-        public async Task<ActionResult> CreateColeta([FromBody] Coleta coleta)
+        public async Task<ActionResult> CreateColeta([FromBody] CriarColetaDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await _coletasService.CreateColeta(coleta);
-
+            var coleta = await _coletasService.CreateColeta(dto);
             return CreatedAtAction(nameof(GetColeta), new { id = coleta.Id }, coleta);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateColeta(int id, [FromBody] Coleta coleta)
+        public async Task<ActionResult> UpdateColeta(int id, [FromBody] AtualizarColetaDto dto)
         {
-            if (id != coleta.Id)
-                return BadRequest("O ID da rota deve ser igual ao ID da coleta.");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            try
-            {
-                await _coletasService.UpdateColeta(coleta);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpPatch("{id}/cancelar")]
-        public async Task<ActionResult> CancelarColeta(int id)
-        {
-            try
-            {
-                await _coletasService.CancelarColeta(id);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _coletasService.UpdateColeta(id, dto);
+            return NoContent();
         }
 
         [HttpPatch("{id}/atribuir")]
         public async Task<ActionResult> AtribuirMotoristaVeiculo(int id, [FromBody] AtribuirColetaRequest request)
         {
-            try
-            {
-                await _coletasService.AtribuirMotoristaVeiculo(id, request.MotoristaId, request.VeiculoId);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _coletasService.AtribuirMotoristaVeiculo(id, request.MotoristaId, request.VeiculoId);
+            return NoContent();
+        }
+
+        [HttpPatch("{id}/iniciar")]
+        public async Task<ActionResult> IniciarColeta(int id)
+        {
+            await _coletasService.IniciarColeta(id);
+            return NoContent();
         }
 
         [HttpPatch("{id}/concluir")]
         public async Task<ActionResult> ConcluirColeta(int id)
         {
-            try
-            {
-                await _coletasService.ConcluirColeta(id);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _coletasService.ConcluirColeta(id);
+            return NoContent();
+        }
+
+        [HttpPatch("{id}/cancelar")]
+        public async Task<ActionResult> CancelarColeta(int id)
+        {
+            await _coletasService.CancelarColeta(id);
+            return NoContent();
+        }
+
+        // Registra uma ocorrencia. O usuario responsavel vem do token JWT.
+        [HttpPost("{id}/ocorrencias")]
+        public async Task<ActionResult> RegistrarOcorrencia(int id, [FromBody] CriarOcorrenciaDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var usuario = User.Identity?.Name ?? "desconhecido";
+            await _coletasService.RegistrarOcorrencia(id, dto.Descricao, usuario);
+            return NoContent();
         }
     }
 
