@@ -64,8 +64,9 @@ export default function DetalheColeta() {
     );
   }
 
-  const cancelada = coleta.status === 5;
-  const coletada = coleta.status === 4;
+  // ALINHAMENTO COM OS ENUMS DO BACKEND:
+  const coletada = coleta.status === 5; // 5 = Coletada
+  const cancelada = coleta.status === 6; // 6 = Cancelada
   const temMotoristaVeiculo = coleta.motoristaId && coleta.veiculoId;
 
   return (
@@ -99,6 +100,8 @@ export default function DetalheColeta() {
           <div><strong>Veículo:</strong> {coleta.veiculo ? coleta.veiculo.placa : '-'}</div>
           <div className="dados-largo"><strong>Observação:</strong> {coleta.observacao || '-'}</div>
         </div>
+        
+        {/* BOTÃO EDITAR: Esconde se estiver Cancelada ou Coletada */}
         {!cancelada && !coletada && (
           <button className="btn" onClick={() => navigate(`/coletas/${coleta.id}/editar`)}>
             <FiEdit /> Editar
@@ -106,7 +109,7 @@ export default function DetalheColeta() {
         )}
       </div>
 
-      {/* Acoes operacionais */}
+      {/* Ações operacionais: O bloco todo some se finalizar/cancelar */}
       {!cancelada && !coletada && (
         <div className="card">
           <h3>Atribuir motorista e veículo</h3>
@@ -144,32 +147,36 @@ export default function DetalheColeta() {
         <h3>Mudar status</h3>
         <div className="acoes">
           {!cancelada && !coletada && (
-            <button
-              className="btn"
-              disabled={!temMotoristaVeiculo || coleta.status !== 2}
-              onClick={() => executar(() => iniciarColeta(coleta.id))}
-            >
-              <FiPlayCircle /> Em coleta
-            </button>
+            <>
+              {/* BOTAO EM COLETA: Ativo apenas se tiver rota atribuída (Status 3) */}
+              <button
+                className="btn"
+                disabled={!temMotoristaVeiculo || coleta.status !== 3}
+                onClick={() => executar(() => iniciarColeta(coleta.id))}
+              >
+                <FiPlayCircle /> Em coleta
+              </button>
+
+              {/* BOTÃO MARCAR COMO COLETADO */}
+              <button
+                className="btn btn-sucesso"
+                disabled={!temMotoristaVeiculo}
+                title={!temMotoristaVeiculo ? 'Vincule motorista e veículo primeiro' : ''}
+                onClick={() => executar(() => concluirColeta(coleta.id))}
+              >
+                <FiCheckCircle /> Marcar como coletado
+              </button>
+
+              {/* BOTÃO CANCELAR */}
+              <button
+                className="btn btn-perigo"
+                onClick={() => executar(() => cancelarColeta(coleta.id))}
+              >
+                <FiXCircle /> Cancelar
+              </button>
+            </>
           )}
-          {!cancelada && !coletada && (
-            <button
-              className="btn btn-sucesso"
-              disabled={!temMotoristaVeiculo}
-              title={!temMotoristaVeiculo ? 'Vincule motorista e veículo primeiro' : ''}
-              onClick={() => executar(() => concluirColeta(coleta.id))}
-            >
-              <FiCheckCircle /> Marcar como coletado
-            </button>
-          )}
-          {!cancelada && !coletada && (
-            <button
-              className="btn btn-perigo"
-              onClick={() => executar(() => cancelarColeta(coleta.id))}
-            >
-              <FiXCircle /> Cancelar
-            </button>
-          )}
+          
           {(cancelada || coletada) && (
             <p className="aviso">Esta coleta está {nomeStatus(coleta.status).toLowerCase()} e não permite mais alterações de status.</p>
           )}

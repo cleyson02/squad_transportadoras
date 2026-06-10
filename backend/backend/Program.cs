@@ -59,7 +59,13 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod());
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Evita o loop infinito ignorando propriedades que criam referências circulares
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
+    
 builder.Services.AddEndpointsApiExplorer();
 
 // Swagger com suporte ao token JWT (botao "Authorize").

@@ -1,11 +1,10 @@
-// Mapeamentos usados em varias telas para traduzir os enums numericos da API.
-
+// Mapeamentos perfeitamente alinhados com o backend C#
 export const STATUS = {
   1: 'Aberta',
-  2: 'Atribuída',
-  3: 'Em Coleta',
-  4: 'Coletada',
-  5: 'Cancelada',
+  3: 'Atribuída',
+  4: 'Em Coleta',
+  5: 'Coletada',
+  6: 'Cancelada',
 };
 
 export const PRIORIDADE = {
@@ -22,14 +21,14 @@ export function nomePrioridade(valor) {
   return PRIORIDADE[valor] || 'Desconhecida';
 }
 
-// Classe CSS do "badge" de status (cores simples).
+// Atualize as cores para não quebrar os novos números
 export function classeStatus(valor) {
-  switch (valor) {
+  switch (Number(valor)) {
     case 1: return 'badge badge-aberta';
-    case 2: return 'badge badge-atribuida';
-    case 3: return 'badge badge-emcoleta';
-    case 4: return 'badge badge-coletada';
-    case 5: return 'badge badge-cancelada';
+    case 3: return 'badge badge-atribuida';
+    case 4: return 'badge badge-emcoleta';
+    case 5: return 'badge badge-coletada';
+    case 6: return 'badge badge-cancelada';
     default: return 'badge';
   }
 }
