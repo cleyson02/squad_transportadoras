@@ -1,9 +1,12 @@
 ﻿using backend.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Context
 {
-    public class AppDbContext : DbContext
+    // Herda de IdentityDbContext para reaproveitar as tabelas de usuários do ASP.NET Core Identity.
+    public class AppDbContext : IdentityDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
