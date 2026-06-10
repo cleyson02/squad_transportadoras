@@ -1,26 +1,26 @@
-﻿using backend.Models;
+﻿using backend.Dtos;
+using backend.Models;
 
 namespace backend.Services
 {
     public interface IColetasService
     {
-        Task<IEnumerable<Coleta>> GetColetas();
+        Task<ResultadoPaginado<Coleta>> GetColetas(ColetaFiltroDto filtro);
 
         Task<Coleta?> GetColeta(int id);
 
-        Task<IEnumerable<Coleta>> GetColetasByRemetente(string remetente);
+        Task<Coleta> CreateColeta(CriarColetaDto dto);
 
-        Task CreateColeta(Coleta coleta);
+        Task UpdateColeta(int id, AtualizarColetaDto dto);
 
-        Task UpdateColeta(Coleta coleta);
+        Task AtribuirMotoristaVeiculo(int coletaId, int motoristaId, int veiculoId);
 
-        Task AtribuirMotoristaVeiculo(
-            int coletaId,
-            int motoristaId,
-            int veiculoId);
+        Task IniciarColeta(int coletaId);
 
         Task CancelarColeta(int coletaId);
 
         Task ConcluirColeta(int coletaId);
+
+        Task RegistrarOcorrencia(int coletaId, string descricao, string usuario);
     }
 }

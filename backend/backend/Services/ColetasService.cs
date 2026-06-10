@@ -1,4 +1,5 @@
 ﻿using backend.Context;
+using backend.Dtos;
 using backend.Enums;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -132,6 +133,31 @@ namespace backend.Services
             coleta.Status = StatusColeta.Coletada;
 
             await _context.SaveChangesAsync();
+        }
+
+        public Task<ResultadoPaginado<Coleta>> GetColetas(ColetaFiltroDto filtro)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Coleta> CreateColeta(CriarColetaDto dto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateColeta(int id, AtualizarColetaDto dto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task IniciarColeta(int coletaId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RegistrarOcorrencia(int coletaId, string descricao, string usuario)
+        {
+            throw new NotImplementedException();
         }
     }
 }
