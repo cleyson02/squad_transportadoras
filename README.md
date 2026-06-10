@@ -17,8 +17,6 @@ veículo, registro de ocorrências e filtros de listagem.
 - Docker Desktop
 - (opcional) ferramenta EF Core: `dotnet tool install --global dotnet-ef`
 
-Detalhes completos em [`dependencies.txt`](./dependencies.txt).
-
 ## Como rodar
 
 ### 1. Subir o banco (Docker)
@@ -57,8 +55,6 @@ npm start
 ```
 
 Frontend: `http://localhost:3000`
-
-Lista completa de comandos em [`commands.txt`](./commands.txt).
 
 ## Variáveis de ambiente / configuração
 
