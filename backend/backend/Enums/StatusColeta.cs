@@ -3,9 +3,9 @@
     public enum StatusColeta
     {
         Aberta = 1,
-        Atribuida = 3,
-        EmColeta = 4,
-        Coletada = 5,
-        Cancelada = 6
+        Atribuida = 2,
+        EmColeta = 3,
+        Coletada = 4,
+        Cancelada = 5
     }
 }

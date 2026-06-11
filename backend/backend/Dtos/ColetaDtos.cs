@@ -4,8 +4,6 @@ using backend.Enums;
 namespace backend.Dtos
 {
     // Dados que o frontend envia para criar uma coleta.
-    // Usamos um DTO para nao expor a entidade inteira e evitar que campos como
-    // Status, NumeroSolicitacao e DataSolicitacao venham do cliente.
     public class CriarColetaDto
     {
         [Required]
