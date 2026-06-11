@@ -65,8 +65,8 @@ export default function DetalheColeta() {
   }
 
   // ALINHAMENTO COM OS ENUMS DO BACKEND:
-  const coletada = coleta.status === 5; // 5 = Coletada
-  const cancelada = coleta.status === 6; // 6 = Cancelada
+  const coletada = coleta.status === 4; // 4 = Coletada
+  const cancelada = coleta.status === 5; // 5 = Cancelada
   const temMotoristaVeiculo = coleta.motoristaId && coleta.veiculoId;
 
   return (
@@ -147,10 +147,10 @@ export default function DetalheColeta() {
         <div className="acoes">
           {!cancelada && !coletada && (
             <>
-              {/* "Em coleta" só é permitido quando a coleta está Atribuída (status 3). */}
+              {/* "Em coleta" só é permitido quando a coleta está Atribuída (status 2). */}
               <button
                 className="btn"
-                disabled={!temMotoristaVeiculo || coleta.status !== 3}
+                disabled={!temMotoristaVeiculo || coleta.status !== 2}
                 onClick={() => executar(() => iniciarColeta(coleta.id))}
               >
                 <FiPlayCircle /> Em coleta
