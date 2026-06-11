@@ -6,87 +6,57 @@ veículo, registro de ocorrências e filtros de listagem.
 
 ## Tecnologias
 
-- **Backend:** C# / .NET 8, ASP.NET Core Web API, EF Core (Code First), SQL Server, ASP.NET Core Identity + JWT, Swagger
+- **Backend:** C# / .NET 8, ASP.NET Core Web API, EF Core (Code First), ASP.NET Core Identity + JWT, Swagger
 - **Frontend:** React, React Router, Axios, react-icons
-- **Banco:** SQL Server 2022 (Docker)
+- **Banco de Dados:** SQL Server 2022
+- **Orquestração:** Docker e Docker Compose (Multi-stage build)
 
 ## Pré-requisitos
 
-- .NET SDK 8.0
-- Node.js 18+ e npm
-- Docker Desktop
-- (opcional) ferramenta EF Core: `dotnet tool install --global dotnet-ef`
+Para rodar a aplicação completa, você precisa apenas do:
+- **Docker Desktop** instalado e rodando.
 
-## Como rodar
+*(Opcional para desenvolvimento local sem containers: .NET SDK 8.0 e Node.js 18+)*
 
-### 1. Subir o banco (Docker)
+## Como rodar (Via Docker)
 
-```bash
-docker compose up -d
-```
+Toda a infraestrutura (Banco, API e Frontend) foi conteinerizada para subir com um único comando.
 
-O SQL Server sobe na porta `1433`. Senha do usuário `sa`: `SenhaForte@123`
-(definida em `docker-compose.yml`).
-
-### 2. Backend (API)
+1. Na raiz do projeto (onde está o arquivo `docker-compose.yml`), abra o terminal e rode:
 
 ```bash
-cd backend/backend
-dotnet restore
-dotnet ef migrations add Inicial   # cria a migration inicial
-dotnet run
+docker compose up -d --build
 ```
 
-- API: `http://localhost:5256`
-- Swagger: `http://localhost:5256/swagger`
+2. Aguarde o processo finalizar. Na primeira execução, o Docker fará o download das imagens, o build do frontend em React, a compilação da API em .NET e aplicará automaticamente as *migrations* e o *seed* no SQL Server.
 
-Ao iniciar, a aplicação aplica as migrations automaticamente e executa o
-**seed** (cria o usuário admin e dados de exemplo).
+### Acessando os serviços
 
-> Se preferir, é possível aplicar a migration com `dotnet ef database update`,
-> mas não é obrigatório: o `dotnet run` já faz isso ao subir.
+- **Frontend (Painel):** `http://localhost:3000`
+- **Backend (Swagger):** `http://localhost:5256/swagger`
+- **Backend (API):** `http://localhost:5256/api`
+- **Banco de Dados:** `localhost,1433` (Usuário: `sa` | Senha: `SenhaForte@123`)
 
-### 3. Frontend
+> **Para parar a aplicação:** Execute `docker compose down`. Se quiser zerar o banco de dados completamente, rode `docker compose down -v`.
 
-```bash
-cd frontend
-npm install
-npm start
-```
+## Usuário padrão (Seed)
 
-Frontend: `http://localhost:3000`
-
-## Variáveis de ambiente / configuração
-
-A configuração fica em `backend/backend/appsettings.json`:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost,1433;Database=TransportadoraDb;User Id=sa;Password=SenhaForte@123;TrustServerCertificate=True;"
-  },
-  "Jwt": {
-    "Key": "chave-secreta-do-case-transportadora-troque-em-producao",
-    "Issuer": "GestaoColetas",
-    "Audience": "GestaoColetasFrontend",
-    "ExpiresHours": "8"
-  }
-}
-```
-
-> Em produção, troque a `Jwt:Key` por uma chave forte e mantenha-a fora do
-> repositório.
-
-A URL da API usada pelo frontend está em `frontend/src/services/api.js`
-(`http://localhost:5256/api`).
-
-## Usuário padrão (seed)
+Ao iniciar pela primeira vez, o banco de dados é populado automaticamente com os seguintes dados de teste:
 
 | Usuário | Senha     |
 |---------|-----------|
 | admin   | Admin@123 |
 
-O seed também cria 2 clientes, 2 motoristas e 2 veículos de exemplo.
+O *seed* também cria 2 clientes, 2 motoristas e 2 veículos de exemplo para facilitar os testes.
+
+## Variáveis de ambiente / configuração
+
+O projeto utiliza o arquivo `backend/backend/appsettings.json` como base, porém as configurações críticas são injetadas diretamente pelo `docker-compose.yml` usando variáveis de ambiente:
+
+- **ConnectionStrings__DefaultConnection:** Aponta a API para o container `sqlserver`.
+- **REACT_APP_API_URL:** Define a rota `http://localhost:5256/api` no build do frontend.
+
+> **Nota de Segurança:** Em produção, as chaves do JWT (`Jwt__Key`) e as senhas do banco devem ser alteradas e mantidas fora do repositório de código.
 
 ## Como validar o sistema
 
@@ -95,21 +65,20 @@ O seed também cria 2 clientes, 2 motoristas e 2 veículos de exemplo.
 3. Abra os **detalhes** da coleta.
 4. **Atribua** um motorista e um veículo.
 5. Tente **marcar como coletado** sem motorista/veículo — deve ser bloqueado.
-6. Com motorista e veículo, mude para **Em coleta** e depois **Coletado**.
-7. **Registre uma ocorrência** e confira data/hora e usuário.
-8. Crie outra coleta, **cancele** e tente coletá-la — deve ser bloqueado.
-9. Use os **filtros** (situação, cliente, período) na listagem.
+6. Com motorista e veículo atribuídos, mude o status para **Em coleta** e depois **Coletada**.
+7. **Registre uma ocorrência** e confira na tabela a data/hora e o usuário responsável.
+8. Crie outra coleta, clique em **Cancelar** e tente coletá-la depois — deve ser bloqueado.
+9. Use os **filtros** (situação, cliente, período) na listagem inicial.
 
 ## Fluxo de status
 
-```
+```text
 Aberta -> Atribuída -> Em Coleta -> Coletada
-                  \-> Cancelada (enquanto não estiver Coletada)
+                  \-> Cancelada (disponível enquanto não estiver Coletada)
 ```
 
-Regras aplicadas:
-
+**Regras de Negócio Aplicadas:**
 - Coleta **cancelada** não volta para *Em Coleta* nem *Coletada*.
-- Não é possível marcar como **Coletada** sem motorista **e** veículo.
-- Toda **ocorrência** guarda data/hora e o usuário responsável (do token JWT).
-- Coletas de **prioridade alta** aparecem destacadas na listagem.
+- Não é possível marcar como **Coletada** ou ir para **Em Coleta** sem motorista **e** veículo vinculados.
+- Toda **ocorrência** guarda data/hora do servidor e o usuário responsável (extraído do token JWT).
+- Coletas de **prioridade alta** recebem ordenação primária no banco de dados e aparecem destacadas no topo da listagem.
