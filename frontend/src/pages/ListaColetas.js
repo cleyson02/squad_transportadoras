@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiEye, FiPlus, FiAlertTriangle, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { listarColetas, listarClientes } from '../services/coletasService';
@@ -97,8 +97,8 @@ export default function ListaColetas() {
           <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
         </div>
 
-        <button type="submit" className="btn">
-          <FiSearch /> Filtrar
+        <button type="submit" className="btn" disabled={carregando}>
+          <FiSearch /> {carregando ? 'Buscando...' : 'Filtrar'}
         </button>
       </form>
 
@@ -118,7 +118,10 @@ export default function ListaColetas() {
           </tr>
         </thead>
         <tbody>
-          {coletas.map((c) => (
+          {carregando && (
+            <tr><td colSpan="8" className="vazio">Carregando...</td></tr>
+          )}
+          {!carregando && coletas.map((c) => (
             <tr key={c.id} className={ehPrioridadeAlta(c.prioridade) ? 'linha-alta' : ''}>
               <td>{c.numeroSolicitacao}</td>
               <td>{c.remetente}</td>

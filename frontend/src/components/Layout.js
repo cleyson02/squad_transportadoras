@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiTruck, FiLogOut, FiPlus, FiList } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';

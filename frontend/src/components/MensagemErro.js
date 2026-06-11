@@ -1,4 +1,3 @@
-import React from 'react';
 import { FiAlertCircle } from 'react-icons/fi';
 
 // Componente simples para exibir mensagens de erro da API.

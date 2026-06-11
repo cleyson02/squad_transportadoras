@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # Banco de dados SQL Server.
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: transportadora-sqlserver
@@ -11,6 +12,62 @@ services:
       - "1433:1433"
     volumes:
       - sqlserver_data:/var/opt/mssql
+    networks:
+      - transportadora-net
+    healthcheck:
+      # Considera o banco "saudavel" quando aceita conexao do usuario sa.
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"SenhaForte@123\" -C -Q \"SELECT 1\" || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"SenhaForte@123\" -Q \"SELECT 1\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # Backend ASP.NET Core 8 Web API.
+  backend:
+    build:
+      context: ./backend/backend
+      dockerfile: Dockerfile
+    container_name: transportadora-backend
+    environment:
+      # Ambiente Development para o Swagger ficar disponivel.
+      ASPNETCORE_ENVIRONMENT: "Development"
+      # A API escuta em HTTP na porta 8080 dentro do container.
+      ASPNETCORE_URLS: "http://+:8080"
+      # Connection string apontando para o servico "sqlserver" (rede do compose).
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=TransportadoraDb;User Id=sa;Password=SenhaForte@123;TrustServerCertificate=True;"
+      # JWT (mesmos valores do appsettings; podem ser ajustados aqui).
+      Jwt__Key: "chave-secreta-do-case-transportadora-troque-em-producao-2025"
+      Jwt__Issuer: "GestaoColetas"
+      Jwt__Audience: "GestaoColetasFrontend"
+      Jwt__ExpiresHours: "8"
+    ports:
+      # Host 5256 -> container 8080 (mantem a porta que o frontend ja usa).
+      - "5256:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - transportadora-net
+
+  # Frontend React (servido como estatico via "serve").
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # URL que o NAVEGADOR usa para chamar a API (passa pelo host).
+        REACT_APP_API_URL: "http://localhost:5256/api"
+    container_name: transportadora-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - transportadora-net
 
 volumes:
   sqlserver_data:
+
+networks:
+  transportadora-net:
+    driver: bridge

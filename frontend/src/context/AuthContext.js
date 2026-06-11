@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { login as loginRequest } from '../services/authService';
 
 // Context simples para guardar o estado de autenticacao do app.

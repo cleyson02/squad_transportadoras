@@ -1,0 +1,15 @@
+# Artefatos que NAO devem ir para a imagem do frontend.
+node_modules/
+build/
+dist/
+.cache/
+npm-debug.log*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+coverage/
+.vscode/
+.git/
+Dockerfile
+.dockerignore

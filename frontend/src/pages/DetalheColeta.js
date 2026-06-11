@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   FiArrowLeft, FiEdit, FiUserPlus, FiPlayCircle, FiCheckCircle,
@@ -101,7 +101,6 @@ export default function DetalheColeta() {
           <div className="dados-largo"><strong>Observação:</strong> {coleta.observacao || '-'}</div>
         </div>
         
-        {/* BOTÃO EDITAR: Esconde se estiver Cancelada ou Coletada */}
         {!cancelada && !coletada && (
           <button className="btn" onClick={() => navigate(`/coletas/${coleta.id}/editar`)}>
             <FiEdit /> Editar
@@ -109,7 +108,7 @@ export default function DetalheColeta() {
         )}
       </div>
 
-      {/* Ações operacionais: O bloco todo some se finalizar/cancelar */}
+      {/* Ações operacionais ficam ocultas quando a coleta já foi finalizada ou cancelada. */}
       {!cancelada && !coletada && (
         <div className="card">
           <h3>Atribuir motorista e veículo</h3>
@@ -148,7 +147,7 @@ export default function DetalheColeta() {
         <div className="acoes">
           {!cancelada && !coletada && (
             <>
-              {/* BOTAO EM COLETA: Ativo apenas se tiver rota atribuída (Status 3) */}
+              {/* "Em coleta" só é permitido quando a coleta está Atribuída (status 3). */}
               <button
                 className="btn"
                 disabled={!temMotoristaVeiculo || coleta.status !== 3}
@@ -157,7 +156,6 @@ export default function DetalheColeta() {
                 <FiPlayCircle /> Em coleta
               </button>
 
-              {/* BOTÃO MARCAR COMO COLETADO */}
               <button
                 className="btn btn-sucesso"
                 disabled={!temMotoristaVeiculo}
@@ -167,7 +165,6 @@ export default function DetalheColeta() {
                 <FiCheckCircle /> Marcar como coletado
               </button>
 
-              {/* BOTÃO CANCELAR */}
               <button
                 className="btn btn-perigo"
                 onClick={() => executar(() => cancelarColeta(coleta.id))}

@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-// URL base da API. Ajuste a porta se o backend rodar em outra.
 const api = axios.create({
-  baseURL: 'http://localhost:5256/api',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5256/api',
 });
 
 // Interceptor de requisicao: insere o token JWT no header Authorization.

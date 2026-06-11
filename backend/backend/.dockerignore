@@ -1,0 +1,10 @@
+# Artefatos de build e arquivos que NAO devem ir para a imagem do backend.
+bin/
+obj/
+.vs/
+*.user
+logs/
+*.log
+**/Properties/launchSettings.json
+Dockerfile
+.dockerignore

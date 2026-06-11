@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FiSave, FiArrowLeft } from 'react-icons/fi';
 import { criarColeta, atualizarColeta, obterColeta, listarClientes } from '../services/coletasService';
